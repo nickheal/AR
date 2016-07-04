@@ -1011,6 +1011,115 @@ THREE.MorphBlendMesh.prototype.getAnimationDuration=function(a){var b=-1;if(a=th
 THREE.MorphBlendMesh.prototype.update=function(a){for(var b=0,c=this.animationsList.length;b<c;b++){var d=this.animationsList[b];if(d.active){var e=d.duration/d.length;d.time+=d.direction*a;if(d.mirroredLoop){if(d.time>d.duration||0>d.time)d.direction*=-1,d.time>d.duration&&(d.time=d.duration,d.directionBackwards=!0),0>d.time&&(d.time=0,d.directionBackwards=!1)}else d.time%=d.duration,0>d.time&&(d.time+=d.duration);var f=d.start+THREE.Math.clamp(Math.floor(d.time/e),0,d.length-1),g=d.weight;f!==d.currentFrame&&
 (this.morphTargetInfluences[d.lastFrame]=0,this.morphTargetInfluences[d.currentFrame]=1*g,this.morphTargetInfluences[f]=0,d.lastFrame=d.currentFrame,d.currentFrame=f);e=d.time%e/e;d.directionBackwards&&(e=1-e);d.currentFrame!==d.lastFrame?(this.morphTargetInfluences[d.currentFrame]=e*g,this.morphTargetInfluences[d.lastFrame]=(1-e)*g):this.morphTargetInfluences[d.currentFrame]=g}}};
 
+var Dust = (function () {
+	'use strict';
+
+    var Dust;
+
+    /*
+     * params.scene
+     * params.number
+     */
+    Dust = function (params) {
+    	this.scene = params.scene;
+        this.number = params.number;
+
+    	this.motes = [];
+    }
+
+    Dust.prototype.draw = function () {
+        var scene, number, motes, geom, mat, m, i;
+
+        scene = this.scene;
+        number = this.number;
+        motes = this.motes;
+
+        for (i = 0; i < number; i++) {
+            geom = new THREE.BoxGeometry(10, 10, 10);
+            mat = new THREE.MeshPhongMaterial({
+                color:0x0000ff
+            });
+            m = new THREE.Mesh(geom, mat);
+ 
+            m.position.x = (Math.random() - .5) * 1000;
+            m.position.y = (Math.random() - .5) * 1000;
+            m.position.z = (Math.random() - .5) * 1000;
+
+            motes.push(m);
+            scene.add(m);
+        }
+    }
+
+    Dust.prototype.animate = function () {
+        var motes, mote, i;
+
+        motes = this.motes;
+
+        for (i = 0; i < motes.length; i++) {
+            mote = motes[i];
+            TweenMax.to(mote.position, 200, {
+                x: (Math.random() - .5) * 1000,
+                y: (Math.random() - .5) * 1000,
+                z: (Math.random() - .5) * 1000
+            });
+        }
+    }
+
+    return Dust;
+})();
+var Grid = (function () {
+	'use strict';
+
+    var Grid;
+
+    /*
+     * params.scene
+     * params.x
+     * params.y
+     * params.z
+     * params.cubeSize
+     * params.data
+     * params.data.total
+     */
+    Grid = function (params) {
+    	this.scene = params.scene;
+    	this.x = params.x;
+    	this.y = params.y;
+    	this.z = params.z;
+    	this.cubeSize = params.cubeSize;
+    	this.data = params.data;
+
+    	this.cubes = [];
+    }
+
+    Grid.prototype.draw = function () {
+    	var geom, mat, m, rowLength, rowCount, i, spacing;
+
+    	rowLength = Math.sqrt(this.data.total);
+    	rowCount = 0;
+    	spacing = this.cubeSize * 1.5;
+
+		for (i = 0; i < this.data.total; i++) {
+			geom = new THREE.BoxGeometry(this.cubeSize, this.cubeSize, this.cubeSize);
+			mat = new THREE.MeshPhongMaterial({
+				color:0x0000ff
+			});
+			m = new THREE.Mesh(geom, mat);
+
+			m.position.x = this.x + ((i % rowLength) * spacing);
+			m.position.y = this.y + (rowCount * spacing);
+			m.position.z = this.z;
+
+			this.cubes.push(m);
+			this.scene.add(m);
+
+			rowCount = rowCount > rowLength ? 0 : rowCount + 1;
+		}
+    }
+
+    return Grid;
+
+})();
 var View3d = (function () {
 	'use strict';
 
@@ -1087,21 +1196,6 @@ var View3d = (function () {
 		this.scene.add(hemisphereLight);  
 		this.scene.add(shadowLight);
 
-		var i;
-		for (i = 0; i < 30; i++) {
-			var mesh, geom, mat, m;
-			mesh = new THREE.Object3D();
-			geom = new THREE.BoxGeometry(20,20,20);
-			mat = new THREE.MeshPhongMaterial({
-				color:0x0000ff
-			});
-			m = new THREE.Mesh(geom, mat);
-			this.scene.add(m);
-			m.position.x = (Math.random() - .5) * 500;
-			m.position.y = (Math.random() - .5) * 500;
-			m.position.z = (Math.random() - .5) * 500;
-		}
-
 		this.controls = new THREE.DeviceOrientationControls(this.camera, true);
 
 		this.loop();
@@ -1109,7 +1203,7 @@ var View3d = (function () {
 
     View3d.prototype.loop = function () {
     	this.controls.update();
-
+    	
     	this.renderer.render(this.scene, this.camera);
 
 		requestAnimationFrame(this.loop.bind(this));
@@ -1237,9 +1331,28 @@ var app = (function () {
 
     app = {
         init: function () {
-            var view3d;
+            var view3d, grid, dust;
 
             view3d = new View3d();
+
+            grid = new Grid({
+                scene: view3d.scene,
+                x: 100,
+                y: 100,
+                z: 100,
+                cubeSize: 20,
+                data: {
+                    total: 20
+                }
+            });
+            grid.draw();
+
+            dust = new Dust({
+                scene: view3d.scene,
+                number: 200
+            });
+            dust.draw();
+            dust.animate();
         }
     };
 

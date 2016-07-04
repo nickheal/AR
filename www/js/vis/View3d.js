@@ -74,21 +74,6 @@ var View3d = (function () {
 		this.scene.add(hemisphereLight);  
 		this.scene.add(shadowLight);
 
-		var i;
-		for (i = 0; i < 30; i++) {
-			var mesh, geom, mat, m;
-			mesh = new THREE.Object3D();
-			geom = new THREE.BoxGeometry(20,20,20);
-			mat = new THREE.MeshPhongMaterial({
-				color:0x0000ff
-			});
-			m = new THREE.Mesh(geom, mat);
-			this.scene.add(m);
-			m.position.x = (Math.random() - .5) * 500;
-			m.position.y = (Math.random() - .5) * 500;
-			m.position.z = (Math.random() - .5) * 500;
-		}
-
 		this.controls = new THREE.DeviceOrientationControls(this.camera, true);
 
 		this.loop();
@@ -96,7 +81,7 @@ var View3d = (function () {
 
     View3d.prototype.loop = function () {
     	this.controls.update();
-
+    	
     	this.renderer.render(this.scene, this.camera);
 
 		requestAnimationFrame(this.loop.bind(this));
