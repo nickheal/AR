@@ -89,18 +89,14 @@ var View3d = (function () {
 			m.position.z = (Math.random() - .5) * 500;
 		}
 
-		this.loop();
+		this.controls = new THREE.DeviceOrientationControls(this.camera, true);
 
-		// Set up accelorometer movement control
-		window.addEventListener("deviceorientation", function (e) {
-			var conv = Math.PI / 180;
-            this.camera.rotation.x = -e.beta * conv;
-            this.camera.rotation.y = -e.gamma * conv;
-            this.camera.rotation.z = e.alpha * conv;
-        }.bind(this), true);
+		this.loop();
     }
 
     View3d.prototype.loop = function () {
+    	this.controls.update();
+
     	this.renderer.render(this.scene, this.camera);
 
 		requestAnimationFrame(this.loop.bind(this));
