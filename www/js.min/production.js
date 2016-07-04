@@ -1107,8 +1107,8 @@ var View3d = (function () {
 		// Set up accelorometer movement control
 		window.addEventListener("deviceorientation", function (e) {
 			var conv = Math.PI / 180;
-            this.camera.rotation.x = -e.beta * conv;
-            this.camera.rotation.y = -e.gamma * conv;
+            this.camera.rotation.x = -e.gamma * conv;
+            this.camera.rotation.y = -e.beta * conv;
             this.camera.rotation.z = e.alpha * conv;
         }.bind(this), true);
     }
