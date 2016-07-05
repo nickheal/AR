@@ -1134,6 +1134,7 @@ var View3d = (function () {
 			this.renderer.setSize(WIDTH, HEIGHT);
 			this.camera.aspect = WIDTH / HEIGHT;
 			this.camera.updateProjectionMatrix();
+			this.effect.setSize(WIDTH, HEIGHT);
 		}.bind(this);
 
 		HEIGHT = window.innerHeight;
@@ -1196,6 +1197,10 @@ var View3d = (function () {
 		this.scene.add(hemisphereLight);  
 		this.scene.add(shadowLight);
 
+		this.effect = new THREE.StereoEffect(this.renderer);
+		this.effect.eyeSeparation = 10;
+		this.effect.setSize(WIDTH, HEIGHT);
+
 		this.controls = new THREE.DeviceOrientationControls(this.camera, true);
 
 		this.loop();
@@ -1204,7 +1209,7 @@ var View3d = (function () {
     View3d.prototype.loop = function () {
     	this.controls.update();
     	
-    	this.renderer.render(this.scene, this.camera);
+    	this.effect.render(this.scene, this.camera);
 
 		requestAnimationFrame(this.loop.bind(this));
     }
@@ -1321,6 +1326,51 @@ THREE.DeviceOrientationControls = function( object ) {
 	};
 
 	this.connect();
+
+};
+
+/**
+ * @author alteredq / http://alteredqualia.com/
+ * @authod mrdoob / http://mrdoob.com/
+ * @authod arodic / http://aleksandarrodic.com/
+ * @authod fonserbc / http://fonserbc.github.io/
+*/
+
+THREE.StereoEffect = function ( renderer ) {
+
+	var _stereo = new THREE.StereoCamera();
+	_stereo.aspect = 0.5;
+
+	this.setSize = function ( width, height ) {
+
+		renderer.setSize( width, height );
+
+	};
+
+	this.render = function ( scene, camera ) {
+
+		scene.updateMatrixWorld();
+
+		if ( camera.parent === null ) camera.updateMatrixWorld();
+
+		_stereo.update( camera );
+
+		var size = renderer.getSize();
+
+		renderer.setScissorTest( true );
+		renderer.clear();
+
+		renderer.setScissor( 0, 0, size.width / 2, size.height );
+		renderer.setViewport( 0, 0, size.width / 2, size.height );
+		renderer.render( scene, _stereo.cameraL );
+
+		renderer.setScissor( size.width / 2, 0, size.width / 2, size.height );
+		renderer.setViewport( size.width / 2, 0, size.width / 2, size.height );
+		renderer.render( scene, _stereo.cameraR );
+
+		renderer.setScissorTest( false );
+
+	};
 
 };
 

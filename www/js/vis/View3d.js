@@ -12,6 +12,7 @@ var View3d = (function () {
 			this.renderer.setSize(WIDTH, HEIGHT);
 			this.camera.aspect = WIDTH / HEIGHT;
 			this.camera.updateProjectionMatrix();
+			this.effect.setSize(WIDTH, HEIGHT);
 		}.bind(this);
 
 		HEIGHT = window.innerHeight;
@@ -74,6 +75,10 @@ var View3d = (function () {
 		this.scene.add(hemisphereLight);  
 		this.scene.add(shadowLight);
 
+		this.effect = new THREE.StereoEffect(this.renderer);
+		this.effect.eyeSeparation = 10;
+		this.effect.setSize(WIDTH, HEIGHT);
+
 		this.controls = new THREE.DeviceOrientationControls(this.camera, true);
 
 		this.loop();
@@ -82,7 +87,7 @@ var View3d = (function () {
     View3d.prototype.loop = function () {
     	this.controls.update();
     	
-    	this.renderer.render(this.scene, this.camera);
+    	this.effect.render(this.scene, this.camera);
 
 		requestAnimationFrame(this.loop.bind(this));
     }
