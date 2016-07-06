@@ -5,11 +5,17 @@ var app = (function () {
 
     app = {
         init: function () {
-            var view3d, grid, dust;
+            var view3d, view2d, indicator, grid, dust;
 
             //window.plugins.insomnia.keepAwake();
 
             view3d = new View3d();
+            view2d = new View2d();
+
+            indicator = new Indicator({
+                stage: view2d.stage
+            });
+            indicator.draw();
 
             grid = new Grid({
                 scene: view3d,

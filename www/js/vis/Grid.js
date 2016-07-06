@@ -51,12 +51,21 @@ var Grid = (function () {
             m.castShadow = true;
             m.receiveShadow = true;
 
-            this.scene.clickTargets.push({
-                obj: this.cubes[i],
-                func: function (i) {
-                    this.cubes[i].material = highlightMaterial;
-                }.bind(this, i)
-            });
+            m.clickFunction = function (i) {
+                var cube = this.cubes[i];
+                if (!cube.animating) {
+                    cube.animating = true;
+                    cube.material = highlightMaterial;
+                    TweenMax.to(cube.scale, .25, {
+                        x:1.2,
+                        y:1.2,
+                        z:1.2,
+                        yoyo: true,
+                        repeat: 1
+                    });
+                }
+            }.bind(this, i)
+            this.scene.clickTargets.push(m);
 
 			rowCount = rowCount > rowLength ? 0 : rowCount + 1;
 		}

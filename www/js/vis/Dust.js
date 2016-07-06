@@ -25,7 +25,7 @@ var Dust = (function () {
             color: 0x00ff00
         });
 
-        geom = new THREE.BoxGeometry(10, 10, 10);
+        geom = new THREE.SphereGeometry(5,32,32);
         for (i = 0; i < number; i++) {
             mat = new THREE.MeshPhongMaterial({
                 color:0x0000ff
@@ -39,12 +39,10 @@ var Dust = (function () {
             motes.push(m);
             scene.add(m);
 
-            this.scene.clickTargets.push({
-                obj: motes[i],
-                func: function (i) {
-                    this.motes[i].material = highlightMaterial;
-                }.bind(this, i)
-            });
+            m.clickFunction = function (i) {
+                this.motes[i].material = highlightMaterial;
+            }.bind(this, i)
+            this.scene.clickTargets.push(m);
         }
     }
 

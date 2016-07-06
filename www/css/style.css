@@ -18,7 +18,9 @@ body {
   height: 100%;
   width: 100%; }
 
-#overlay {
-  position: absolute; }
+canvas {
+  position: absolute;
+  top: 0;
+  left: 0; }
 
 /*# sourceMappingURL=style.css.map */

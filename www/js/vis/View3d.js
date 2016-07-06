@@ -90,20 +90,21 @@ var View3d = (function () {
     }
 
     View3d.prototype.loop = function () {
-    	var i;
-
-    	for (i = 0; i < this.clickTargets.length; i++) {
-    		var vector, raycaster, intersects;
-    		vector = this.clickVector;
-			this.clickVector.set(0, 0, 0.5);
-    		raycaster = this.raycaster;
-    		vector.unproject(this.camera);
-    		raycaster.set(this.camera.position, vector.sub(this.camera.position).normalize());
-    		intersects = raycaster.intersectObjects([this.clickTargets[i].obj]);
-    		if (intersects.length) {
-    			this.clickTargets[i].func();
-    		}
-    	}
+    	// Check for clicks
+    	var vector, raycaster, intersects;
+		vector = this.clickVector;
+		this.clickVector.set(0, 0, 0.5);
+		raycaster = this.raycaster;
+		vector.unproject(this.camera);
+		raycaster.set(this.camera.position, vector.sub(this.camera.position).normalize());
+		intersects = raycaster.intersectObjects(this.clickTargets);
+		if (intersects.length) {
+			intersects.sort(function (a, b) {
+				return a.distance - b.distance;
+			});
+			intersects[0].object.clickFunction();
+		}
+		// --
 
     	this.controls.update();
     	
