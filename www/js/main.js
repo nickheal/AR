@@ -7,12 +7,14 @@ var app = (function () {
         init: function () {
             var view3d, grid, dust;
 
+            //window.plugins.insomnia.keepAwake();
+
             view3d = new View3d();
 
             grid = new Grid({
-                scene: view3d.scene,
-                x: 100,
-                y: 100,
+                scene: view3d,
+                x: 0,
+                y: 0,
                 z: 100,
                 cubeSize: 20,
                 data: {
@@ -22,7 +24,7 @@ var app = (function () {
             grid.draw();
 
             dust = new Dust({
-                scene: view3d.scene,
+                scene: view3d,
                 number: 200
             });
             dust.draw();

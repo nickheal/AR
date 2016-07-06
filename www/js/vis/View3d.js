@@ -18,6 +18,7 @@ var View3d = (function () {
 		HEIGHT = window.innerHeight;
 		WIDTH = window.innerWidth;
 
+		this.clickTargets = [];
 		this.scene = new THREE.Scene();
 
 		this.scene.fog = new THREE.Fog(0xf7d9aa, 100, 950);
@@ -76,15 +77,34 @@ var View3d = (function () {
 		this.scene.add(shadowLight);
 
 		this.effect = new THREE.StereoEffect(this.renderer);
-		this.effect.eyeSeparation = 10;
+		this.effect.eyeSeparation = 200;
 		this.effect.setSize(WIDTH, HEIGHT);
 
 		this.controls = new THREE.DeviceOrientationControls(this.camera, true);
+
+		// View clicking
+		this.clickVector = new THREE.Vector3();
+		this.raycaster = new THREE.Raycaster();
 
 		this.loop();
     }
 
     View3d.prototype.loop = function () {
+    	var i;
+
+    	for (i = 0; i < this.clickTargets.length; i++) {
+    		var vector, raycaster, intersects;
+    		vector = this.clickVector;
+			this.clickVector.set(0, 0, 0.5);
+    		raycaster = this.raycaster;
+    		vector.unproject(this.camera);
+    		raycaster.set(this.camera.position, vector.sub(this.camera.position).normalize());
+    		intersects = raycaster.intersectObjects([this.clickTargets[i].obj]);
+    		if (intersects.length) {
+    			this.clickTargets[i].func();
+    		}
+    	}
+
     	this.controls.update();
     	
     	this.effect.render(this.scene, this.camera);

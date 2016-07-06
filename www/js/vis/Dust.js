@@ -15,14 +15,18 @@ var Dust = (function () {
     }
 
     Dust.prototype.draw = function () {
-        var scene, number, motes, geom, mat, m, i;
+        var scene, number, motes, geom, mat, highlightMaterial, m, i;
 
-        scene = this.scene;
+        scene = this.scene.scene;
         number = this.number;
         motes = this.motes;
 
+        highlightMaterial = new THREE.MeshPhongMaterial({
+            color: 0x00ff00
+        });
+
+        geom = new THREE.BoxGeometry(10, 10, 10);
         for (i = 0; i < number; i++) {
-            geom = new THREE.BoxGeometry(10, 10, 10);
             mat = new THREE.MeshPhongMaterial({
                 color:0x0000ff
             });
@@ -34,6 +38,13 @@ var Dust = (function () {
 
             motes.push(m);
             scene.add(m);
+
+            this.scene.clickTargets.push({
+                obj: motes[i],
+                func: function (i) {
+                    this.motes[i].material = highlightMaterial;
+                }.bind(this, i)
+            });
         }
     }
 

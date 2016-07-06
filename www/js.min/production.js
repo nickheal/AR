@@ -1028,14 +1028,18 @@ var Dust = (function () {
     }
 
     Dust.prototype.draw = function () {
-        var scene, number, motes, geom, mat, m, i;
+        var scene, number, motes, geom, mat, highlightMaterial, m, i;
 
-        scene = this.scene;
+        scene = this.scene.scene;
         number = this.number;
         motes = this.motes;
 
+        highlightMaterial = new THREE.MeshPhongMaterial({
+            color: 0x00ff00
+        });
+
+        geom = new THREE.BoxGeometry(10, 10, 10);
         for (i = 0; i < number; i++) {
-            geom = new THREE.BoxGeometry(10, 10, 10);
             mat = new THREE.MeshPhongMaterial({
                 color:0x0000ff
             });
@@ -1047,6 +1051,13 @@ var Dust = (function () {
 
             motes.push(m);
             scene.add(m);
+
+            this.scene.clickTargets.push({
+                obj: motes[i],
+                func: function (i) {
+                    this.motes[i].material = highlightMaterial;
+                }.bind(this, i)
+            });
         }
     }
 
@@ -1093,14 +1104,18 @@ var Grid = (function () {
     }
 
     Grid.prototype.draw = function () {
-    	var geom, mat, m, rowLength, rowCount, i, spacing;
+    	var geom, mat, highlightMaterial, m, rowLength, rowCount, i, spacing;
 
     	rowLength = Math.sqrt(this.data.total);
     	rowCount = 0;
     	spacing = this.cubeSize * 1.5;
 
+        highlightMaterial = new THREE.MeshPhongMaterial({
+            color: 0x00ff00
+        });
+
+        geom = new THREE.BoxGeometry(this.cubeSize, this.cubeSize, this.cubeSize);
 		for (i = 0; i < this.data.total; i++) {
-			geom = new THREE.BoxGeometry(this.cubeSize, this.cubeSize, this.cubeSize);
 			mat = new THREE.MeshPhongMaterial({
 				color:0x0000ff
 			});
@@ -1111,7 +1126,17 @@ var Grid = (function () {
 			m.position.z = this.z;
 
 			this.cubes.push(m);
-			this.scene.add(m);
+			this.scene.scene.add(m);
+
+            m.castShadow = true;
+            m.receiveShadow = true;
+
+            this.scene.clickTargets.push({
+                obj: this.cubes[i],
+                func: function (i) {
+                    this.cubes[i].material = highlightMaterial;
+                }.bind(this, i)
+            });
 
 			rowCount = rowCount > rowLength ? 0 : rowCount + 1;
 		}
@@ -1140,6 +1165,7 @@ var View3d = (function () {
 		HEIGHT = window.innerHeight;
 		WIDTH = window.innerWidth;
 
+		this.clickTargets = [];
 		this.scene = new THREE.Scene();
 
 		this.scene.fog = new THREE.Fog(0xf7d9aa, 100, 950);
@@ -1198,15 +1224,34 @@ var View3d = (function () {
 		this.scene.add(shadowLight);
 
 		this.effect = new THREE.StereoEffect(this.renderer);
-		this.effect.eyeSeparation = 10;
+		this.effect.eyeSeparation = 200;
 		this.effect.setSize(WIDTH, HEIGHT);
 
 		this.controls = new THREE.DeviceOrientationControls(this.camera, true);
+
+		// View clicking
+		this.clickVector = new THREE.Vector3();
+		this.raycaster = new THREE.Raycaster();
 
 		this.loop();
     }
 
     View3d.prototype.loop = function () {
+    	var i;
+
+    	for (i = 0; i < this.clickTargets.length; i++) {
+    		var vector, raycaster, intersects;
+    		vector = this.clickVector;
+			this.clickVector.set(0, 0, 0.5);
+    		raycaster = this.raycaster;
+    		vector.unproject(this.camera);
+    		raycaster.set(this.camera.position, vector.sub(this.camera.position).normalize());
+    		intersects = raycaster.intersectObjects([this.clickTargets[i].obj]);
+    		if (intersects.length) {
+    			this.clickTargets[i].func();
+    		}
+    	}
+
     	this.controls.update();
     	
     	this.effect.render(this.scene, this.camera);
@@ -1383,12 +1428,14 @@ var app = (function () {
         init: function () {
             var view3d, grid, dust;
 
+            //window.plugins.insomnia.keepAwake();
+
             view3d = new View3d();
 
             grid = new Grid({
-                scene: view3d.scene,
-                x: 100,
-                y: 100,
+                scene: view3d,
+                x: 0,
+                y: 0,
                 z: 100,
                 cubeSize: 20,
                 data: {
@@ -1398,7 +1445,7 @@ var app = (function () {
             grid.draw();
 
             dust = new Dust({
-                scene: view3d.scene,
+                scene: view3d,
                 number: 200
             });
             dust.draw();

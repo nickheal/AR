@@ -24,14 +24,18 @@ var Grid = (function () {
     }
 
     Grid.prototype.draw = function () {
-    	var geom, mat, m, rowLength, rowCount, i, spacing;
+    	var geom, mat, highlightMaterial, m, rowLength, rowCount, i, spacing;
 
     	rowLength = Math.sqrt(this.data.total);
     	rowCount = 0;
     	spacing = this.cubeSize * 1.5;
 
+        highlightMaterial = new THREE.MeshPhongMaterial({
+            color: 0x00ff00
+        });
+
+        geom = new THREE.BoxGeometry(this.cubeSize, this.cubeSize, this.cubeSize);
 		for (i = 0; i < this.data.total; i++) {
-			geom = new THREE.BoxGeometry(this.cubeSize, this.cubeSize, this.cubeSize);
 			mat = new THREE.MeshPhongMaterial({
 				color:0x0000ff
 			});
@@ -42,7 +46,17 @@ var Grid = (function () {
 			m.position.z = this.z;
 
 			this.cubes.push(m);
-			this.scene.add(m);
+			this.scene.scene.add(m);
+
+            m.castShadow = true;
+            m.receiveShadow = true;
+
+            this.scene.clickTargets.push({
+                obj: this.cubes[i],
+                func: function (i) {
+                    this.cubes[i].material = highlightMaterial;
+                }.bind(this, i)
+            });
 
 			rowCount = rowCount > rowLength ? 0 : rowCount + 1;
 		}
