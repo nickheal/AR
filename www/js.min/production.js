@@ -1454,13 +1454,13 @@ var View3d = (function () {
 			});
 			// Check if hover or click etc
 			if (this.activeObjects !== intersects[0].object) {
+				this.indicator.cancel();
 				if (this.activeObjects) {
 					this.activeObjects.hoverOut && this.activeObjects.hoverOut();
 				}
 				intersects[0].object.hoverIn && intersects[0].object.hoverIn();
 
 				if (intersects[0].object.click) {
-					this.indicator.cancel();
 					this.indicator.click(intersects[0].object.click, this.clickTime);
 				}
 			}
