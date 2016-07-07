@@ -1460,6 +1460,7 @@ var View3d = (function () {
 				intersects[0].object.hoverIn && intersects[0].object.hoverIn();
 
 				if (intersects[0].object.click) {
+					this.indicator.cancel();
 					this.indicator.click(intersects[0].object.click, this.clickTime);
 				}
 			}
