@@ -1104,7 +1104,7 @@ var Dust = (function () {
             }.bind(this, this.motes[i]);
             m.click = function (i, mote) {
                 mote.deleting = true;
-                clickTargets.splice(clickTargets.indexOf(mote), 1);
+                this.scene.clickTargets.splice(clickTargets.indexOf(mote), 1);
                 TweenMax.to(mote.scale, 1, {
                     x: 2,
                     y: 2,
@@ -1114,12 +1114,12 @@ var Dust = (function () {
                 mote.material.transparent = true;
                 TweenMax.to(mote.material, 1, {
                     opacity: 0,
-                    onComplete: function (motes, i, material, scene, clickTargets) {
+                    onComplete: function (motes, i, material, scene) {
                         scene.remove(mote);
                         motes.splice(motes.indexOf(mote), 1);
                         material.opacity = 1;
                     },
-                    onCompleteParams: [this.motes, i, mote.material, this.scene.scene, this.scene.clickTargets]
+                    onCompleteParams: [this.motes, i, mote.material, this.scene.scene]
                 });
             }.bind(this, i, this.motes[i])
             this.scene.clickTargets.push(m);
