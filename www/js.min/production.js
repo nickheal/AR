@@ -1647,7 +1647,7 @@ var app = (function () {
         init: function () {
             var view3d, view2d, indicator, grid, dust;
 
-            insomnia.keepAwake();
+            window.plugins.Insomnia.keepAwake();
 
             view2d = new View2d();
 
