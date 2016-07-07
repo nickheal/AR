@@ -1684,7 +1684,9 @@ var app = (function () {
 })();
 
 $(document).ready(function () {
-    window.plugins.insomnia.keepAwake();
+    window.plugins.insomnia.keepAwake(function () {
+        alert('called');
+    });
     app.init();
 });
 //# sourceMappingURL=production.js.map
