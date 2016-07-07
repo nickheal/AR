@@ -1647,8 +1647,6 @@ var app = (function () {
         init: function () {
             var view3d, view2d, indicator, grid, dust;
 
-            //window.plugins.Insomnia.keepAwake();
-
             view2d = new View2d();
 
             indicator = new Indicator({
@@ -1686,6 +1684,7 @@ var app = (function () {
 })();
 
 $(document).ready(function () {
+    window.plugins.insomnia.keepAwake();
     app.init();
 });
 //# sourceMappingURL=production.js.map
