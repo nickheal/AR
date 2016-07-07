@@ -3,7 +3,10 @@ var View3d = (function () {
 
     var View3d;
 
-    View3d = function () {
+    /*
+     * params.indicator - the indicator to show the countdown to a click
+     */
+    View3d = function (params) {
     	var fieldOfView, aspectRatio, nearPlane, farPlane, HEIGHT, WIDTH, container, handleWindowResize;
 
 		handleWindowResize = function () {
@@ -18,7 +21,9 @@ var View3d = (function () {
 		HEIGHT = window.innerHeight;
 		WIDTH = window.innerWidth;
 
+		this.indicator = params.indicator;
 		this.clickTargets = [];
+		this.clickTime = 1000;
 		this.scene = new THREE.Scene();
 
 		this.scene.fog = new THREE.Fog(0xf7d9aa, 100, 950);
@@ -49,6 +54,7 @@ var View3d = (function () {
 		
 		container = document.getElementById('graphics-holder');
 		container.appendChild(this.renderer.domElement);
+		$(this.renderer.domElement).addClass('three-render');
 		
 		window.addEventListener('resize', handleWindowResize, false);
 
@@ -77,7 +83,7 @@ var View3d = (function () {
 		this.scene.add(shadowLight);
 
 		this.effect = new THREE.StereoEffect(this.renderer);
-		this.effect.eyeSeparation = 200;
+		this.effect.eyeSeparation = 100;
 		this.effect.setSize(WIDTH, HEIGHT);
 
 		this.controls = new THREE.DeviceOrientationControls(this.camera, true);
@@ -102,7 +108,22 @@ var View3d = (function () {
 			intersects.sort(function (a, b) {
 				return a.distance - b.distance;
 			});
-			intersects[0].object.clickFunction();
+			// Check if hover or click etc
+			if (this.activeObjects !== intersects[0].object) {
+				if (this.activeObjects) {
+					this.activeObjects.hoverOut && this.activeObjects.hoverOut();
+				}
+				intersects[0].object.hoverIn && intersects[0].object.hoverIn();
+
+				if (intersects[0].object.click) {
+					this.indicator.click(intersects[0].object.click, this.clickTime);
+				}
+			}
+			this.activeObjects = intersects[0].object;
+		} else if (this.activeObjects) {
+			this.activeObjects.hoverOut && this.activeObjects.hoverOut();
+			this.indicator.cancel();
+			this.activeObjects = null;
 		}
 		// --
 

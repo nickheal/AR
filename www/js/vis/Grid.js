@@ -51,7 +51,7 @@ var Grid = (function () {
             m.castShadow = true;
             m.receiveShadow = true;
 
-            m.clickFunction = function (i) {
+            m.hoverIn = function (i) {
                 var cube = this.cubes[i];
                 if (!cube.animating) {
                     cube.animating = true;
@@ -61,10 +61,18 @@ var Grid = (function () {
                         y:1.2,
                         z:1.2,
                         yoyo: true,
-                        repeat: 1
+                        repeat: 1,
+                        onComplete: function () {
+                            cube.animating = false;
+                        },
+                        onCompleteParams: [cube]
                     });
                 }
-            }.bind(this, i)
+            }.bind(this, i);
+            m.hoverOut = function (i) {
+                var cube = this.cubes[i];
+                cube.material = mat;
+            }.bind(this, i);
             this.scene.clickTargets.push(m);
 
 			rowCount = rowCount > rowLength ? 0 : rowCount + 1;

@@ -7,15 +7,18 @@ var app = (function () {
         init: function () {
             var view3d, view2d, indicator, grid, dust;
 
-            //window.plugins.insomnia.keepAwake();
+            window.plugins.insomnia.keepAwake();
 
-            view3d = new View3d();
             view2d = new View2d();
 
             indicator = new Indicator({
                 stage: view2d.stage
             });
             indicator.draw();
+
+            view3d = new View3d({
+                indicator: indicator
+            });
 
             grid = new Grid({
                 scene: view3d,
@@ -31,7 +34,7 @@ var app = (function () {
 
             dust = new Dust({
                 scene: view3d,
-                number: 200
+                number: 80
             });
             dust.draw();
             dust.animate();

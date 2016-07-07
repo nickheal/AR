@@ -23,4 +23,11 @@ canvas {
     position: absolute;
     top: 0;
     left: 0;
+
+    &.three-render {
+        z-index: 1;
+    }
+    &.pixi-render {
+        z-index: 20;
+    }
 }

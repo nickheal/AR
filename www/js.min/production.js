@@ -1022,6 +1022,30 @@ THREE.MorphBlendMesh.prototype.getAnimationDuration=function(a){var b=-1;if(a=th
 THREE.MorphBlendMesh.prototype.update=function(a){for(var b=0,c=this.animationsList.length;b<c;b++){var d=this.animationsList[b];if(d.active){var e=d.duration/d.length;d.time+=d.direction*a;if(d.mirroredLoop){if(d.time>d.duration||0>d.time)d.direction*=-1,d.time>d.duration&&(d.time=d.duration,d.directionBackwards=!0),0>d.time&&(d.time=0,d.directionBackwards=!1)}else d.time%=d.duration,0>d.time&&(d.time+=d.duration);var f=d.start+THREE.Math.clamp(Math.floor(d.time/e),0,d.length-1),g=d.weight;f!==d.currentFrame&&
 (this.morphTargetInfluences[d.lastFrame]=0,this.morphTargetInfluences[d.currentFrame]=1*g,this.morphTargetInfluences[f]=0,d.lastFrame=d.currentFrame,d.currentFrame=f);e=d.time%e/e;d.directionBackwards&&(e=1-e);d.currentFrame!==d.lastFrame?(this.morphTargetInfluences[d.currentFrame]=e*g,this.morphTargetInfluences[d.lastFrame]=(1-e)*g):this.morphTargetInfluences[d.currentFrame]=g}}};
 
+var tools = (function () {
+    'use strict';
+
+    var tools;
+
+    tools = {
+        getPointOnCircleCircumference: function (cx, cy, r, a) {
+            var x, y;
+
+            a = a * (Math.PI / 180);
+
+            x = cx + r * Math.cos(a);
+            y = cy + r * Math.sin(a);
+
+            return {
+                x: x,
+                y: y
+            }
+        }
+    };
+
+    return tools;
+
+})();
 var Dust = (function () {
 	'use strict';
 
@@ -1045,27 +1069,58 @@ var Dust = (function () {
         number = this.number;
         motes = this.motes;
 
-        highlightMaterial = new THREE.MeshPhongMaterial({
-            color: 0x00ff00
-        });
-
         geom = new THREE.SphereGeometry(5,32,32);
         for (i = 0; i < number; i++) {
+            highlightMaterial = new THREE.MeshPhongMaterial({
+                color: 0x00ff00
+            });
             mat = new THREE.MeshPhongMaterial({
                 color:0x0000ff
             });
             m = new THREE.Mesh(geom, mat);
  
-            m.position.x = (Math.random() - .5) * 1000;
-            m.position.y = (Math.random() - .5) * 1000;
-            m.position.z = (Math.random() - .5) * 1000;
+            m.position.x = (Math.random() - .5) * 100;
+            m.position.y = (Math.random() - .5) * 100;
+            m.position.z = (Math.random() - .5) * 100;
 
             motes.push(m);
             scene.add(m);
 
-            m.clickFunction = function (i) {
-                this.motes[i].material = highlightMaterial;
-            }.bind(this, i)
+            motes[i].matCache = {
+                mat: mat,
+                highlightMaterial: highlightMaterial
+            }
+
+            m.castShadow = true;
+            m.receiveShadow = true;
+
+            m.hoverIn = function (mote) {
+                mote.material = mote.matCache.highlightMaterial;
+            }.bind(this, this.motes[i]);
+            m.hoverOut = function (mote) {
+                if (!mote.deleting) {
+                    mote.material = mote.matCache.mat;
+                }
+            }.bind(this, this.motes[i]);
+            m.click = function (i, mote) {
+                mote.deleting = true;
+                TweenMax.to(mote.scale, 1, {
+                    x: 2,
+                    y: 2,
+                    z: 2
+                });
+                mote.material.transparent = true;
+                TweenMax.to(mote.material, 1, {
+                    opacity: 0,
+                    onComplete: function (motes, i, material, scene, clickTargets) {
+                        scene.remove(mote);
+                        clickTargets.splice(clickTargets.indexOf(mote), 1);
+                        motes.splice(motes.indexOf(mote), 1);
+                        material.opacity = 1;
+                    },
+                    onCompleteParams: [this.motes, i, mote.material, this.scene.scene, this.scene.clickTargets]
+                });
+            }.bind(this, i, this.motes[i])
             this.scene.clickTargets.push(m);
         }
     }
@@ -1078,9 +1133,9 @@ var Dust = (function () {
         for (i = 0; i < motes.length; i++) {
             mote = motes[i];
             TweenMax.to(mote.position, 200, {
-                x: (Math.random() - .5) * 1000,
-                y: (Math.random() - .5) * 1000,
-                z: (Math.random() - .5) * 1000
+                x: (Math.random() - .5) * 100,
+                y: (Math.random() - .5) * 100,
+                z: (Math.random() - .5) * 100
             });
         }
     }
@@ -1140,7 +1195,7 @@ var Grid = (function () {
             m.castShadow = true;
             m.receiveShadow = true;
 
-            m.clickFunction = function (i) {
+            m.hoverIn = function (i) {
                 var cube = this.cubes[i];
                 if (!cube.animating) {
                     cube.animating = true;
@@ -1150,10 +1205,18 @@ var Grid = (function () {
                         y:1.2,
                         z:1.2,
                         yoyo: true,
-                        repeat: 1
+                        repeat: 1,
+                        onComplete: function () {
+                            cube.animating = false;
+                        },
+                        onCompleteParams: [cube]
                     });
                 }
-            }.bind(this, i)
+            }.bind(this, i);
+            m.hoverOut = function (i) {
+                var cube = this.cubes[i];
+                cube.material = mat;
+            }.bind(this, i);
             this.scene.clickTargets.push(m);
 
 			rowCount = rowCount > rowLength ? 0 : rowCount + 1;
@@ -1173,6 +1236,7 @@ var Indicator = (function () {
      */
     Indicator = function (params) {
     	this.stage = params.stage;
+        this.size = 10;
     }
 
     Indicator.prototype.draw = function () {
@@ -1180,7 +1244,7 @@ var Indicator = (function () {
         width = window.innerWidth;
         height = window.innerHeight;
         colour = '0x000000';
-        size = 10;
+        size = this.size;
 
         this.graphic = {
             left: null,
@@ -1206,6 +1270,48 @@ var Indicator = (function () {
         this.stage.addChild(this.graphic.right);
     }
 
+    /*
+     * callback - the function to activate on click
+     * time - how long the countdown takes
+     */
+    Indicator.prototype.click = function (callback, time) {
+        var pointPos, size, charger, width, height, startColour;
+        size = this.size + 5;
+        width = window.innerWidth;
+        height = window.innerHeight;
+        this.charger = new PIXI.Graphics();
+        charger = this.charger;
+        this.stage.addChild(charger);
+
+        startColour = 50;
+
+        this.chargeUp = TweenMax.to({r: 0}, time / 1000, {
+            r: 360,
+            ease: Linear.easeNone,
+            onUpdate: function (self) {
+                var colour;
+                colour = Math.round(self.target.r * 0.7);
+                colour = '0x' + colour.toString(16) + '0000';
+                charger.beginFill(colour);
+                pointPos = tools.getPointOnCircleCircumference(width * .25, height * .5, size, self.target.r - 90);
+                charger.drawCircle(pointPos.x, pointPos.y, 3);
+                pointPos = tools.getPointOnCircleCircumference(width * .75, height * .5, size, self.target.r - 90);
+                charger.drawCircle(pointPos.x, pointPos.y, 3);
+            },
+            onUpdateParams: ["{self}"],
+            onComplete: function (stage) {
+                stage.removeChild(charger);
+                callback();
+            },
+            onCompleteParams: [this.stage]
+        });
+    }
+
+    Indicator.prototype.cancel = function () {
+        this.chargeUp.kill();
+        this.stage.removeChild(this.charger);
+    }
+
     return Indicator;
 
 })();
@@ -1222,6 +1328,7 @@ var View2d = (function () {
 
 		this.renderer = PIXI.autoDetectRenderer(width, height, {antialias:true, transparent:true});
 		document.getElementById('graphics-holder').appendChild(this.renderer.view);
+		$(this.renderer.view).addClass('pixi-render');
 		this.stage = new PIXI.Container();
 		this.loop();
     }
@@ -1240,7 +1347,10 @@ var View3d = (function () {
 
     var View3d;
 
-    View3d = function () {
+    /*
+     * params.indicator - the indicator to show the countdown to a click
+     */
+    View3d = function (params) {
     	var fieldOfView, aspectRatio, nearPlane, farPlane, HEIGHT, WIDTH, container, handleWindowResize;
 
 		handleWindowResize = function () {
@@ -1255,7 +1365,9 @@ var View3d = (function () {
 		HEIGHT = window.innerHeight;
 		WIDTH = window.innerWidth;
 
+		this.indicator = params.indicator;
 		this.clickTargets = [];
+		this.clickTime = 1000;
 		this.scene = new THREE.Scene();
 
 		this.scene.fog = new THREE.Fog(0xf7d9aa, 100, 950);
@@ -1286,6 +1398,7 @@ var View3d = (function () {
 		
 		container = document.getElementById('graphics-holder');
 		container.appendChild(this.renderer.domElement);
+		$(this.renderer.domElement).addClass('three-render');
 		
 		window.addEventListener('resize', handleWindowResize, false);
 
@@ -1314,7 +1427,7 @@ var View3d = (function () {
 		this.scene.add(shadowLight);
 
 		this.effect = new THREE.StereoEffect(this.renderer);
-		this.effect.eyeSeparation = 200;
+		this.effect.eyeSeparation = 100;
 		this.effect.setSize(WIDTH, HEIGHT);
 
 		this.controls = new THREE.DeviceOrientationControls(this.camera, true);
@@ -1339,7 +1452,22 @@ var View3d = (function () {
 			intersects.sort(function (a, b) {
 				return a.distance - b.distance;
 			});
-			intersects[0].object.clickFunction();
+			// Check if hover or click etc
+			if (this.activeObjects !== intersects[0].object) {
+				if (this.activeObjects) {
+					this.activeObjects.hoverOut && this.activeObjects.hoverOut();
+				}
+				intersects[0].object.hoverIn && intersects[0].object.hoverIn();
+
+				if (intersects[0].object.click) {
+					this.indicator.click(intersects[0].object.click, this.clickTime);
+				}
+			}
+			this.activeObjects = intersects[0].object;
+		} else if (this.activeObjects) {
+			this.activeObjects.hoverOut && this.activeObjects.hoverOut();
+			this.indicator.cancel();
+			this.activeObjects = null;
 		}
 		// --
 
@@ -1519,15 +1647,18 @@ var app = (function () {
         init: function () {
             var view3d, view2d, indicator, grid, dust;
 
-            //window.plugins.insomnia.keepAwake();
+            window.plugins.insomnia.keepAwake();
 
-            view3d = new View3d();
             view2d = new View2d();
 
             indicator = new Indicator({
                 stage: view2d.stage
             });
             indicator.draw();
+
+            view3d = new View3d({
+                indicator: indicator
+            });
 
             grid = new Grid({
                 scene: view3d,
@@ -1543,7 +1674,7 @@ var app = (function () {
 
             dust = new Dust({
                 scene: view3d,
-                number: 200
+                number: 80
             });
             dust.draw();
             dust.animate();

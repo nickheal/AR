@@ -22,5 +22,9 @@ canvas {
   position: absolute;
   top: 0;
   left: 0; }
+  canvas.three-render {
+    z-index: 1; }
+  canvas.pixi-render {
+    z-index: 20; }
 
 /*# sourceMappingURL=style.css.map */

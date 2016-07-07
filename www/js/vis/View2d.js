@@ -11,6 +11,7 @@ var View2d = (function () {
 
 		this.renderer = PIXI.autoDetectRenderer(width, height, {antialias:true, transparent:true});
 		document.getElementById('graphics-holder').appendChild(this.renderer.view);
+		$(this.renderer.view).addClass('pixi-render');
 		this.stage = new PIXI.Container();
 		this.loop();
     }

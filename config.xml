@@ -20,7 +20,7 @@
   <preference name="android-minSdkVersion" value="14"/>
   <preference name="android-installLocation" value="auto"/>
 
-  <plugin name="cordova-plugin-insomnia" />
+  <plugin name="nl.x-services.plugins.insomnia" spec="4.0.1" source="pgb" />
 
   <gap:plugin name="org.apache.cordova.battery-status"/>
   <gap:plugin name="org.apache.cordova.camera"/>
