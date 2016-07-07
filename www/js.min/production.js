@@ -1308,7 +1308,7 @@ var Indicator = (function () {
     }
 
     Indicator.prototype.cancel = function () {
-        this.chargeUp.kill();
+        this.chargeUp && this.chargeUp.kill();
         this.stage.removeChild(this.charger);
     }
 
