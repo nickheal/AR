@@ -1104,7 +1104,7 @@ var Dust = (function () {
             }.bind(this, this.motes[i]);
             m.click = function (i, mote) {
                 mote.deleting = true;
-                this.scene.clickTargets.splice(clickTargets.indexOf(mote), 1);
+                this.scene.clickTargets.splice(this.scene.clickTargets.indexOf(mote), 1);
                 TweenMax.to(mote.scale, 1, {
                     x: 2,
                     y: 2,
