@@ -1104,17 +1104,18 @@ var Dust = (function () {
             }.bind(this, this.motes[i]);
             m.click = function (i, mote) {
                 mote.deleting = true;
+                clickTargets.splice(clickTargets.indexOf(mote), 1);
                 TweenMax.to(mote.scale, 1, {
                     x: 2,
                     y: 2,
-                    z: 2
+                    z: 2,
+                    ease: Power2.easeOut
                 });
                 mote.material.transparent = true;
                 TweenMax.to(mote.material, 1, {
                     opacity: 0,
                     onComplete: function (motes, i, material, scene, clickTargets) {
                         scene.remove(mote);
-                        clickTargets.splice(clickTargets.indexOf(mote), 1);
                         motes.splice(motes.indexOf(mote), 1);
                         material.opacity = 1;
                     },
