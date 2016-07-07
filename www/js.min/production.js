@@ -1647,7 +1647,7 @@ var app = (function () {
         init: function () {
             var view3d, view2d, indicator, grid, dust;
 
-            cordova.plugins.insomnia.keepAwake();
+            insomnia.keepAwake();
 
             view2d = new View2d();
 
