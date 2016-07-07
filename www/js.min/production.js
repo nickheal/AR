@@ -1684,9 +1684,13 @@ var app = (function () {
 })();
 
 $(document).ready(function () {
-    window.plugins.insomnia.keepAwake(function () {
-        alert('called');
-    });
     app.init();
 });
+
+
+var gameready = function () {
+    window.plugins.insomnia.keepAwake();
+}
+document.addEventListener("deviceready", gameready, false);
+        
 //# sourceMappingURL=production.js.map
